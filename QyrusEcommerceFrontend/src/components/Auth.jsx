@@ -7,6 +7,7 @@ import { useUser } from '../context/UserContext';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [termsChecked, setTermsChecked] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useUser(); // Get login method from context
@@ -14,13 +15,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Ensure the terms checkbox is checked
+    if (!termsChecked) {
+      setError('You must agree to the terms and conditions');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
     try {
       const { data } = await authAPI.login(email, password);
       localStorage.setItem('token', data.token);
-      // localStorage.setItem('username', email);
       login(email); // Update global login state
       navigate('/products'); // Redirect to products page
     } catch (err) {
@@ -56,12 +63,32 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsChecked}
+              onChange={(e) => setTermsChecked(e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="terms" className="text-sm">
+              I agree to the{' '}
+              <Link
+                to="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                terms and conditions
+              </Link>
+            </label>
+          </div>
           <button
             type="submit"
             disabled={loading}
             className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            {loading ? 'Loading...' : 'Login'}
+            {loading ? 'Loading...' : 'Sign In'}
           </button>
         </form>
         <div className="text-center space-y-2">
@@ -76,6 +103,7 @@ const Login = () => {
     </div>
   );
 };
+
 
 // src/components/Signup.jsx
 const Signup = () => {

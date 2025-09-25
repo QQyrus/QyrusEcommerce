@@ -18,6 +18,7 @@ const ProductDetails = () => {
   const { email, isLoggedIn } = useUser();
   
   const location = useLocation();
+  const [compareList, setCompareList] = useState([]);
   
 
   // Fetch product details
@@ -52,8 +53,31 @@ const ProductDetails = () => {
       }
     };
 
+    // Handle product comparison
+  const handleCompare = () => {
+    let updatedCompareList = [...compareList];
+
+    // Check if product is already in comparison
+    if (updatedCompareList.some(item => item.id === product.id)) {
+      updatedCompareList = updatedCompareList.filter(item => item.id !== product.id);
+    } else {
+      updatedCompareList.push(product);
+    }
+
+    if (updatedCompareList.length > 3) {
+      toast.error("You can compare up to 3 products.");
+      return;
+    }
+
+    setCompareList(updatedCompareList);
+    localStorage.setItem('compareProducts', JSON.stringify(updatedCompareList));
+    toast.success("Product added for comparison!");
+  };
+
   useEffect(() => {
     fetchProductDetails();
+    const storedCompareList = JSON.parse(localStorage.getItem('compareProducts')) || [];
+    setCompareList(storedCompareList);
   }, [productId]);
 
   if (!product) return <div>Loading...</div>;
@@ -252,7 +276,30 @@ const ProductDetails = () => {
             >
               Add to Cart
             </button>
+            <button
+              onClick={handleCompare}
+              className={`px-4 py-2 rounded ${
+                compareList.some(item => item.id === product.id)
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-600 text-white hover:bg-gray-700'
+              }`}
+            >
+              {compareList.some(item => item.id === product.id) ? 'Remove from Compare' : 'Compare'}
+            </button>
           </div>
+
+          {/* Compare Now Button */}
+          {compareList.length >= 2 && (
+            <div className="mt-4">
+              <button
+                onClick={() => navigate('/compare')}
+                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              >
+                Compare Now ({compareList.length})
+              </button>
+            </div>
+          )}
+          
         </div>
       </div>
 
