@@ -231,6 +231,7 @@ jobs:
             -X POST "$ANALYZE_URL" \
             -H "Content-Type: application/json" \
             -H "github-token: ${GH_TOKEN}" \
+            -H "request-source: seer" \
             -H "ngrok-skip-browser-warning: true" \
             --data-binary @payload.json)
 
