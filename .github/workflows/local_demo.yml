@@ -219,7 +219,7 @@ jobs:
               web_project_name: $web_project_name,
               web_suite_name: $web_suite_name,
               web_run_configuration_name: $web_run_configuration_name,
-              environment_name: staging
+              environment_name: "staging"
             }' > payload.json
 
           HTTP_CODE=$(curl -sS \
