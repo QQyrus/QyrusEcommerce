@@ -64,7 +64,7 @@
 #         run: |
 #           set -euo pipefail
 
-#           ANALYZE_URL="https://stg-gateway.qyrus.com:8243/seer-common-produce-noauth/v1/analyze-impact"
+#           ANALYZE_URL="https://stg-gateway.qyrus.com/seer-common-produce-noauth/v1/analyze-impact"
 
 #           jq -n \
 #             --arg repo "$REPO_NAME" \
@@ -186,7 +186,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ANALYZE_URL="https://stg-gateway.qyrus.com:8243/seer-common-produce-noauth/v1/analyze-impact"
+          ANALYZE_URL="https://stg-gateway.qyrus.com/seer-common-produce-noauth/v1/analyze-impact"
           # ANALYZE_URL="${ANALYZE_URL:-https://carrousel-crinkly-rack.ngrok-free.dev/analyze-impact}"
 
           jq -n \
@@ -262,7 +262,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          STATUS_URL="https://stg-gateway.qyrus.com:8243/seer-common-produce-noauth/v1/analysis-status/${ANALYSIS_JOB_ID}"
+          STATUS_URL="https://stg-gateway.qyrus.com/seer-common-produce-noauth/v1/analysis-status/${ANALYSIS_JOB_ID}"
           DEADLINE=$((SECONDS + 45 * 60))
           INTERVAL_SECONDS=30
 
