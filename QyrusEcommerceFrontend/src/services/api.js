@@ -72,6 +72,22 @@ export const authAPI = {
     });
   },
 
+  getSavedCart: (email) => api.get('/get-saved-cart/', { params: { email } }),
+
+  saveCartItem: (email, cartItemId) => api.post('/save-cart-item/', {
+    email,
+    cart_item_id: cartItemId,
+  }),
+
+  restoreCartItem: (email, cartItemId) => api.post('/restore-cart-item/', {
+    email,
+    cart_item_id: cartItemId,
+  }),
+
+  removeSavedCartItem: (email, cartItemId) => api.delete('/remove-saved-cart-item/', {
+    data: { email, cart_item_id: cartItemId },
+  }),
+
   getCart: (email) => {
     return api.get('/get-cart/', { params: {email} });
   },
