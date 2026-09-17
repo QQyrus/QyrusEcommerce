@@ -23,6 +23,9 @@ public class CartItem {
     private String provider;
     private String size;
     private Integer quantity;
+
+    @Column(name = "saved_for_later", nullable = false)
+    private boolean savedForLater = false;
     
     @PrePersist
     public void generateId() {
@@ -30,4 +33,4 @@ public class CartItem {
             this.id = UUID.randomUUID().toString();
         }
     }
-} 
+}
