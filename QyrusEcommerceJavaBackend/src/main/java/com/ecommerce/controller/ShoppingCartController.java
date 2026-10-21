@@ -3,6 +3,7 @@ package com.ecommerce.controller;
 import com.ecommerce.dto.AddToCartRequest;
 import com.ecommerce.dto.CartItemResponse;
 import com.ecommerce.dto.RemoveFromCartRequest;
+import com.ecommerce.dto.SavedCartItemRequest;
 import com.ecommerce.service.CartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,4 +71,47 @@ public class ShoppingCartController {
         response.put("cart", updatedCart);
         return ResponseEntity.ok(response);
     }
-} 
+
+    @GetMapping("/get-saved-cart")
+    public ResponseEntity<Map<String, Object>> getSavedCart(@RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("email", email);
+        response.put("saved_cart", cartService.getSavedCartItems(email));
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/save-cart-item")
+    public ResponseEntity<Map<String, Object>> saveCartItem(@RequestBody SavedCartItemRequest request) {
+        validateSavedCartItemRequest(request);
+        cartService.saveCartItem(request.getEmail(), request.getCartItemId());
+        return ResponseEntity.ok(cartState(request.getEmail()));
+    }
+
+    @PostMapping("/restore-cart-item")
+    public ResponseEntity<Map<String, Object>> restoreCartItem(@RequestBody SavedCartItemRequest request) {
+        validateSavedCartItemRequest(request);
+        cartService.restoreCartItem(request.getEmail(), request.getCartItemId());
+        return ResponseEntity.ok(cartState(request.getEmail()));
+    }
+
+    @DeleteMapping("/remove-saved-cart-item")
+    public ResponseEntity<Map<String, Object>> removeSavedCartItem(@RequestBody SavedCartItemRequest request) {
+        validateSavedCartItemRequest(request);
+        cartService.removeSavedCartItem(request.getEmail(), request.getCartItemId());
+        return ResponseEntity.ok(cartState(request.getEmail()));
+    }
+
+    private Map<String, Object> cartState(String email) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("email", email);
+        response.put("cart", cartService.getCartItems(email));
+        response.put("saved_cart", cartService.getSavedCartItems(email));
+        return response;
+    }
+
+    private void validateSavedCartItemRequest(SavedCartItemRequest request) {
+        if (request == null || request.getEmail() == null || request.getCartItemId() == null) {
+            throw new IllegalArgumentException("Email and cartItemId are required");
+        }
+    }
+}
