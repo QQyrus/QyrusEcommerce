@@ -1,0 +1,76 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  java-backend:
+    build:
+      context: ./QyrusEcommerceJavaBackend
+    container_name: qart_java_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce?createDatabaseIfNotExist=true
+    ports:
+      - "9893:9893"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  csharp-backend:
+    build:
+      context: ./QyrusEcommerceCSharpBackend
+    container_name: qart_csharp_backend
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=ecommerce;User=user;Password=password;"
+    ports:
+      - "9892:9892"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      java-backend:
+        condition: service_started
+
+  python-backend:
+    build:
+      context: ./QyrusEcommerceBackend
+    container_name: qart_python_backend
+    environment:
+      DATABASE_URL: mysql+pymysql://user:password@mysql:3306/ecommerce
+    ports:
+      - "9891:9891"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      java-backend:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./QyrusEcommerceFrontend
+      args:
+        VITE_JAVA_API_URL: http://localhost:9893
+        VITE_CSHARP_API_URL: http://localhost:9892
+        VITE_PYTHON_API_URL: http://localhost:9891
+    container_name: qart_frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - java-backend
+      - csharp-backend
+      - python-backend
+
+volumes:
+  mysql_data:

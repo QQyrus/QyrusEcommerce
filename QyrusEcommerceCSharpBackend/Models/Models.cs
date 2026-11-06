@@ -146,13 +146,3 @@ public class Order {
     [JsonPropertyName("status")] public string Status { get; set; } = "";
     [JsonPropertyName("created_at")] public string CreatedAt { get; set; } = "";
 }
-
-public class verification_token_data {
-    public string Email { get; set; } = "";
-    public string Otp { get; set; } = "";
-}
-
-public class password_reset_token_data {
-    public string Email { get; set; } = "";
-    public string Otp { get; set; } = "";
-}

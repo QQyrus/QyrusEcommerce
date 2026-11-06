@@ -16,10 +16,10 @@ const ProductDetails = () => {
   const [selectedSize, setSelectedSize] = useState('');
   const navigate = useNavigate();
   const { email, isLoggedIn } = useUser();
-  
+
   const location = useLocation();
   const [compareList, setCompareList] = useState([]);
-  
+
 
   // Fetch product details
   const fetchProductDetails = async () => {
@@ -38,12 +38,12 @@ const ProductDetails = () => {
 
     // Add to Cart handler
     const handleAddToCart = async () => {
-      
+
       if (!email) {
         toast.error('You need to log in to add items to the cart.');
         return;
       }
-  
+
       try {
         await authAPI.addToCart(email, productId, selectedColor, selectedProvider, selectedSize, quantity);
         toast.success('Added to cart successfully!');
@@ -80,245 +80,266 @@ const ProductDetails = () => {
     setCompareList(storedCompareList);
   }, [productId]);
 
-  if (!product) return <div>Loading...</div>;
+  if (!product) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-gray-500">
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-6">
-
+    <div className="min-h-screen bg-gray-50">
       {/* Toast Notifications */}
       <ToastContainer />
-      
-      {/* Back Button */}
-      <button
-        onClick={() => {
-          if (location.state?.previousPath) {
-            navigate(location.state.previousPath); // Go to the tracked previous path
-          } else {
-            navigate('/products'); // Fallback to products page
-          }
-        }}
-        className="mb-4 px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
-      >
-        Back
-      </button>
 
-      <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
-        {/* fav button */}
-        
-        
-        {/* Product Image */}
-        <div className="relative flex-1">
-        {/* Favorites Icon */}
-        {isLoggedIn && (
-          <button
-            onClick={async () => {
-              try {
-                await authAPI.addFavorite(email, product.id); // Call the addFavorite API
-                console.log(`Product ${product.id} added to favorites`);
-                toast.success("Added to favorites!");
-              } catch (err) {
-                console.error('Failed to add to favorites:', err);
-                toast.error("Failed to add to favorites.");
-              }
-            }}
-            className="absolute top-4 right-4 bg-white p-2 rounded-full shadow hover:bg-gray-100 z-10"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-6 h-6 text-red-500"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+      <div className="container mx-auto px-4 md:px-6 py-6">
+        {/* Back Button */}
+        <button
+          onClick={() => {
+            if (location.state?.previousPath) {
+              navigate(location.state.previousPath); // Go to the tracked previous path
+            } else {
+              navigate('/products'); // Fallback to products page
+            }
+          }}
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-violet-700 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+            <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clipRule="evenodd" />
+          </svg>
+          Back
+        </button>
+
+        <div className="grid gap-10 md:grid-cols-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+          {/* Product Image */}
+          <div className="relative">
+            {/* Favorites Icon */}
+            {isLoggedIn && (
+              <button
+                onClick={async () => {
+                  try {
+                    await authAPI.addFavorite(email, product.id); // Call the addFavorite API
+                    console.log(`Product ${product.id} added to favorites`);
+                    toast.success("Added to favorites!");
+                  } catch (err) {
+                    console.error('Failed to add to favorites:', err);
+                    toast.error("Failed to add to favorites.");
+                  }
+                }}
+                className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-5 h-5 text-red-500"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                  />
+                </svg>
+              </button>
+            )}
+            <div className="aspect-square w-full overflow-hidden rounded-xl bg-gray-100">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="h-full w-full object-cover"
               />
-            </svg>
-          </button>
-        )}
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-96 object-cover rounded"
-        />
-      </div>
-
-        {/* Product Details */}
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">{product.name}</h1>
-          <p className="text-gray-700 mt-2">
-            {product.category} / {product.subcategory}
-          </p>
-          <p className="text-xl font-bold mt-4">${product.price}</p>
-
-          {/* Description */}
-          <div className="mt-4">
-            <h2 className="font-bold">Description:</h2>
-            <p className="text-gray-700 mt-2">{product.description || 'No description available'}</p>
+            </div>
           </div>
 
-          {/* Rating */}
-          <div className="mt-4">
-            <h2 className="font-bold">Rating:</h2>
-            <p className="text-yellow-500 flex items-center">
-              {'★'.repeat(Math.floor(product.rating || 0))}
-              {'☆'.repeat(5 - Math.floor(product.rating || 0))}
-              <span className="ml-2 text-gray-600">({product.rating || 'No rating'})</span>
+          {/* Product Details */}
+          <div>
+            <span className="inline-flex items-center rounded-full bg-violet-50 text-violet-700 text-xs font-semibold uppercase tracking-wide px-3 py-1">
+              {product.category} {product.subcategory ? `· ${product.subcategory}` : ''}
+            </span>
+            <h1 className="mt-3 text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">{product.name}</h1>
+
+            {/* Rating */}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-amber-500 tracking-tight">
+                {'★'.repeat(Math.floor(product.rating || 0))}
+                {'☆'.repeat(5 - Math.floor(product.rating || 0))}
+              </span>
+              <span className="text-sm text-gray-500">({product.rating || 'No rating'})</span>
+            </div>
+
+            <p className="mt-4 text-3xl font-bold text-gray-900">${product.price}</p>
+
+            {/* Description */}
+            <p className="mt-4 text-gray-600 leading-relaxed">
+              {product.description || 'No description available'}
             </p>
-          </div>
 
-          {/* Color Selection */}
-          {product.colors?.length > 0 && (
-            <div className="mt-4">
-              <label className="font-bold">Color:</label>
-              <div className="flex space-x-2 mt-2">
-                {product.colors.map((color) => (
-                  <div
-                    key={color.hex}
-                    className={`w-8 h-8 rounded-full cursor-pointer`}
-                    style={{
-                      backgroundColor: color.hex,
-                      border: selectedColor === color.hex ? '2px solid black' : 'none',
-                    }}
-                    title={color.name}
-                    onClick={() => setSelectedColor(color.hex)}
-                  ></div>
-                ))}
+            <div className="mt-6 h-px bg-gray-100" />
+
+            {/* Color Selection */}
+            {product.colors?.length > 0 && (
+              <div className="mt-6">
+                <label className="block text-sm font-semibold text-gray-800">Color</label>
+                <div className="flex gap-2 mt-2">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color.hex}
+                      type="button"
+                      className={`h-8 w-8 rounded-full ring-offset-2 transition ${
+                        selectedColor === color.hex ? 'ring-2 ring-violet-600' : 'ring-1 ring-gray-200'
+                      }`}
+                      style={{ backgroundColor: color.hex }}
+                      title={color.name}
+                      onClick={() => setSelectedColor(color.hex)}
+                    ></button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size Selection */}
+            {product.sizes?.length > 0 && (
+              <div className="mt-6">
+                <label className="block text-sm font-semibold text-gray-800">Size</label>
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                  className="mt-2 w-full sm:w-48 rounded-lg border-gray-200 text-sm focus:border-violet-500 focus:ring-violet-500"
+                >
+                  {product.sizes.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Provider Selection */}
+            {product.providers?.length > 0 && (
+              <div className="mt-6">
+                <label className="block text-sm font-semibold text-gray-800">Provider</label>
+                <select
+                  value={selectedProvider}
+                  onChange={(e) => setSelectedProvider(e.target.value)}
+                  className="mt-2 w-full sm:w-48 rounded-lg border-gray-200 text-sm focus:border-violet-500 focus:ring-violet-500"
+                >
+                  {product.providers.map((provider) => (
+                    <option key={provider} value={provider}>
+                      {provider}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Quantity Selection */}
+            <div className="mt-6">
+              <label className="block text-sm font-semibold text-gray-800">Quantity</label>
+              <div className="mt-2 inline-flex items-center rounded-full border border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="flex h-9 w-9 items-center justify-center text-gray-500 hover:text-violet-700 transition-colors"
+                  aria-label="Decrease quantity"
+                >
+                  −
+                </button>
+                <span className="w-10 text-center text-sm font-semibold text-gray-900">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="flex h-9 w-9 items-center justify-center text-gray-500 hover:text-violet-700 transition-colors"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
               </div>
             </div>
-          )}
 
-          {/* Size Selection */}
-          {product.sizes?.length > 0 && (
-            <div className="mt-4">
-              <label className="font-bold">Size:</label>
-              <select
-                value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
-                className="p-2 border rounded"
-              >
-                {product.sizes.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Provider Selection */}
-          {product.providers?.length > 0 && (
-            <div className="mt-4">
-              <label className="font-bold">Provider:</label>
-              <select
-                value={selectedProvider}
-                onChange={(e) => setSelectedProvider(e.target.value)}
-                className="p-2 border rounded"
-              >
-                {product.providers.map((provider) => (
-                  <option key={provider} value={provider}>
-                    {provider}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Quantity Selection */}
-          <div className="mt-4">
-            <label className="font-bold">Quantity:</label>
-            <input
-              type="number"
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              className="p-2 border rounded w-16"
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className="mt-6 flex space-x-4">
-          <button
-              onClick={() => {
-                if (!email) {
-                  toast.error("You need to log in to proceed.");
-                  return;
-                }
-
-                // Navigate to Buy Now (Address Selection) Page
-                navigate('/buy-now', {
-                  state: {
-                    products: [
-                      {
-                        productId,
-                        productName: product.name,
-                        quantity,
-                        selectedColor,
-                        selectedProvider,
-                        selectedSize,
-                        price: product.price,
-                      },
-                    ],
-                  },
-                });
-              }}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Buy It Now!
-            </button>
-
-            <button
-              onClick={handleAddToCart}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Add to Cart
-            </button>
-            <button
-              onClick={handleCompare}
-              className={`px-4 py-2 rounded ${
-                compareList.some(item => item.id === product.id)
-                  ? 'bg-red-600 text-white'
-                  : 'bg-gray-600 text-white hover:bg-gray-700'
-              }`}
-            >
-              {compareList.some(item => item.id === product.id) ? 'Remove from Compare' : 'Compare'}
-            </button>
-          </div>
-
-          {/* Compare Now Button */}
-          {compareList.length >= 2 && (
-            <div className="mt-4">
+            {/* Buttons */}
+            <div className="mt-8 flex flex-wrap gap-3">
               <button
-                onClick={() => navigate('/compare')}
-                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                onClick={() => {
+                  if (!email) {
+                    toast.error("You need to log in to proceed.");
+                    return;
+                  }
+
+                  // Navigate to Buy Now (Address Selection) Page
+                  navigate('/buy-now', {
+                    state: {
+                      products: [
+                        {
+                          productId,
+                          productName: product.name,
+                          quantity,
+                          selectedColor,
+                          selectedProvider,
+                          selectedSize,
+                          price: product.price,
+                        },
+                      ],
+                    },
+                  });
+                }}
+                className="rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white hover:bg-black transition-colors shadow-sm"
               >
-                Compare Now ({compareList.length})
+                Buy It Now
+              </button>
+
+              <button
+                onClick={handleAddToCart}
+                className="rounded-full bg-violet-600 px-6 py-3 text-sm font-semibold text-white hover:bg-violet-700 transition-colors shadow-sm"
+              >
+                Add to Cart
+              </button>
+              <button
+                onClick={handleCompare}
+                className={`rounded-full px-6 py-3 text-sm font-semibold transition-colors shadow-sm ${
+                  compareList.some(item => item.id === product.id)
+                    ? 'bg-red-600 text-white hover:bg-red-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {compareList.some(item => item.id === product.id) ? 'Remove from Compare' : 'Compare'}
               </button>
             </div>
+
+            {/* Compare Now Button */}
+            {compareList.length >= 2 && (
+              <div className="mt-4">
+                <button
+                  onClick={() => navigate('/compare')}
+                  className="rounded-full bg-indigo-50 text-indigo-700 px-6 py-2.5 text-sm font-semibold hover:bg-indigo-100 transition-colors"
+                >
+                  Compare Now ({compareList.length})
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="mt-10 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+          <h2 className="text-xl font-bold text-gray-900">Comments</h2>
+          {Array.isArray(product.comments) && product.comments.length > 0 ? (
+            <ul className="mt-4 space-y-3">
+              {product.comments.map((comment, index) => (
+                <li key={index} className="p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700">
+                  {comment}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 mt-3">No comments available.</p>
           )}
-          
         </div>
       </div>
-
-      {/* Comments Section */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold">Comments:</h2>
-        {Array.isArray(product.comments) && product.comments.length > 0 ? (
-          <ul className="mt-4 space-y-4">
-            {product.comments.map((comment, index) => (
-              <li key={index} className="p-4 border rounded">
-                <p className="text-gray-700">{comment}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500 mt-2">No comments available.</p>
-        )}
-      </div>
-
     </div>
   );
 };

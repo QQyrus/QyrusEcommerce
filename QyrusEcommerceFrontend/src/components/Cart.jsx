@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
 import { useUser } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from './PageHeader';
+import EmptyState from './EmptyState';
+import CheckoutSteps from './CheckoutSteps';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -75,62 +78,109 @@ const Cart = () => {
     return selectedItems.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
-  if (loading) return <div>Loading cart...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">My Cart</h1>
-      {cartItems.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {cartItems.map((item) => (
-              <div
-                key={item.cart_item_id}
-                className={`p-4 border rounded shadow hover:shadow-lg transition ${
-                  selectedItems.find((selected) => selected.cart_item_id === item.cart_item_id)
-                    ? 'border-blue-500'
-                    : ''
-                }`}
-                onClick={() => handleSelectItem(item)}
-              >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-40 object-cover rounded"
-                />
-                <h2 className="text-xl font-bold mt-2">{item.name}</h2>
-                <p className="text-gray-700">Color: {item.color}</p>
-                <p className="text-gray-700">Size: {item.size}</p>
-                <p className="text-gray-700">Provider: {item.provider}</p>
-                <p className="text-gray-700">Quantity: {item.quantity}</p>
-                <p className="text-gray-700 font-bold">Price: ₹{item.price}</p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering selection on button click
-                    handleRemoveItem(item.cart_item_id);
-                  }}
-                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                >
-                  Remove
-                </button>
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader
+        icon="🛍️"
+        eyebrow="Checkout"
+        title="My Cart"
+        subtitle="Review your picks, then select items to take to checkout."
+      />
+
+      <div className="container mx-auto px-4 md:px-6 py-10">
+        <CheckoutSteps current="Cart" />
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-white border border-gray-100 overflow-hidden animate-pulse p-4">
+                <div className="aspect-square bg-gray-200 rounded-xl" />
+                <div className="mt-3 h-3.5 bg-gray-200 rounded w-3/4" />
+                <div className="mt-2 h-3.5 bg-gray-200 rounded w-1/3" />
               </div>
             ))}
           </div>
-          <div className="mt-6">
-            <h2 className="text-xl font-bold">Total Price: ₹{calculateTotalPrice()}</h2>
-            <button
-              onClick={handleCheckout}
-              disabled={selectedItems.length === 0}
-              className="mt-4 px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              Checkout
-            </button>
+        ) : error ? (
+          <div className="rounded-xl bg-red-50 border border-red-100 text-red-600 text-center py-3 px-4">
+            {error}
           </div>
-        </>
-      ) : (
-        <p>Your cart is empty.</p>
-      )}
+        ) : cartItems.length > 0 ? (
+          <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              {cartItems.map((item) => {
+                const isSelected = selectedItems.find((selected) => selected.cart_item_id === item.cart_item_id);
+                return (
+                  <div
+                    key={item.cart_item_id}
+                    className={`relative bg-white rounded-2xl border p-4 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                      isSelected ? 'border-violet-500 ring-2 ring-violet-100' : 'border-gray-100'
+                    }`}
+                    onClick={() => handleSelectItem(item)}
+                  >
+                    {isSelected && (
+                      <div className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-violet-600 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+                          <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="aspect-square w-full overflow-hidden rounded-xl bg-gray-100">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <h2 className="mt-3 font-semibold text-gray-900">{item.name}</h2>
+                    <div className="mt-1 text-sm text-gray-500 space-y-0.5">
+                      <p>Color: {item.color} · Size: {item.size}</p>
+                      <p>Provider: {item.provider} · Qty: {item.quantity}</p>
+                    </div>
+                    <p className="mt-2 font-bold text-gray-900">₹{item.price}</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering selection on button click
+                        handleRemoveItem(item.cart_item_id);
+                      }}
+                      className="mt-3 w-full rounded-full bg-red-50 text-red-600 text-sm font-semibold py-2 hover:bg-red-100 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Order summary */}
+            <div className="h-fit bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-20">
+              <h2 className="text-lg font-bold text-gray-900">Order Summary</h2>
+              <div className="mt-4 flex justify-between text-sm text-gray-600">
+                <span>Items selected</span>
+                <span>{selectedItems.length}</span>
+              </div>
+              <div className="mt-2 flex justify-between text-base font-bold text-gray-900 border-t border-gray-100 pt-3">
+                <span>Total</span>
+                <span>₹{calculateTotalPrice()}</span>
+              </div>
+              <button
+                onClick={handleCheckout}
+                disabled={selectedItems.length === 0}
+                className="mt-5 w-full rounded-full bg-violet-600 text-white font-semibold py-3 hover:bg-violet-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                Checkout
+              </button>
+            </div>
+          </div>
+        ) : (
+          <EmptyState
+            icon="🛒"
+            title="Your cart is empty"
+            subtitle="Looks like you haven't added anything yet. Let's fix that."
+            actionLabel="Continue Shopping"
+            onAction={() => navigate('/products')}
+          />
+        )}
+      </div>
     </div>
   );
 };

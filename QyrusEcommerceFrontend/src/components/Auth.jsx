@@ -3,6 +3,30 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import { useUser } from '../context/UserContext';
+import Logo from './Logo';
+
+const AuthShell = ({ title, subtitle, children }) => (
+  <div className="relative min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 overflow-hidden">
+    <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-violet-200/50 blur-3xl" />
+    <div className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-indigo-200/50 blur-3xl" />
+    <div className="relative max-w-md w-full">
+      <div className="flex justify-center mb-6">
+        <Logo size="lg" />
+      </div>
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-violet-900/5 border border-gray-100 p-8">
+        <h2 className="text-2xl font-extrabold text-gray-900 text-center tracking-tight">{title}</h2>
+        {subtitle && <p className="mt-1 text-sm text-gray-500 text-center">{subtitle}</p>}
+        <div className="mt-6">{children}</div>
+      </div>
+    </div>
+  </div>
+);
+
+const inputClass =
+  'w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-shadow';
+
+const primaryButtonClass =
+  'w-full py-2.5 px-4 rounded-full bg-violet-600 text-white font-semibold hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -38,69 +62,62 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <h2 className="text-3xl font-bold text-center">Login</h2>
-        {error && <div className="text-red-500 text-center">{error}</div>}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <input
-              type="email"
-              required
-              className="w-full px-3 py-2 border rounded"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              required
-              className="w-full px-3 py-2 border rounded"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={termsChecked}
-              onChange={(e) => setTermsChecked(e.target.checked)}
-              className="mr-2"
-            />
-            <label htmlFor="terms" className="text-sm">
-              I agree to the{' '}
-              <Link
-                to="/terms"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                terms and conditions
-              </Link>
-            </label>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            {loading ? 'Loading...' : 'Sign In'}
-          </button>
-        </form>
-        <div className="text-center space-y-2">
-          <Link to="/forgot-password" className="text-blue-600 hover:underline block">
-            Forgot Password?
-          </Link>
-          <Link to="/signup" className="text-blue-600 hover:underline block">
-            Don't have an account? Sign up
-          </Link>
+    <AuthShell title="Welcome back" subtitle="Sign in to continue to Qart">
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm text-center py-2">
+          {error}
         </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="email"
+          required
+          className={inputClass}
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          required
+          className={inputClass}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="terms"
+            checked={termsChecked}
+            onChange={(e) => setTermsChecked(e.target.checked)}
+            className="mr-2 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+          />
+          <label htmlFor="terms" className="text-sm text-gray-600">
+            I agree to the{' '}
+            <Link
+              to="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-violet-600 hover:underline font-medium"
+            >
+              terms and conditions
+            </Link>
+          </label>
+        </div>
+        <button type="submit" disabled={loading} className={primaryButtonClass}>
+          {loading ? 'Loading...' : 'Sign In'}
+        </button>
+      </form>
+      <div className="text-center space-y-2 mt-5 text-sm">
+        <Link to="/forgot-password" className="text-violet-600 hover:underline block font-medium">
+          Forgot Password?
+        </Link>
+        <Link to="/signup" className="text-gray-500 hover:text-violet-600 block">
+          Don't have an account? <span className="font-medium">Sign up</span>
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 };
 
@@ -149,70 +166,57 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <h2 className="text-3xl font-bold text-center">Sign Up</h2>
-        {error && <div className="text-red-500 text-center">{error}</div>}
-        
-        {!showOtpForm ? (
-          <form onSubmit={handleSignup} className="space-y-6">
-            <div>
-              <input
-                type="email"
-                required
-                className="w-full px-3 py-2 border rounded"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                required
-                className="w-full px-3 py-2 border rounded"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              {loading ? 'Loading...' : 'Sign Up'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOtp} className="space-y-6">
-            <div>
-              <input
-                type="text"
-                required
-                className="w-full px-3 py-2 border rounded"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              {loading ? 'Verifying...' : 'Verify OTP'}
-            </button>
-          </form>
-        )}
-        
-        <div className="text-center">
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Already have an account? Login
-          </Link>
+    <AuthShell title="Create your account" subtitle="Join Qart and start shopping">
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm text-center py-2">
+          {error}
         </div>
+      )}
+
+      {!showOtpForm ? (
+        <form onSubmit={handleSignup} className="space-y-4">
+          <input
+            type="email"
+            required
+            className={inputClass}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            required
+            className={inputClass}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button type="submit" disabled={loading} className={primaryButtonClass}>
+            {loading ? 'Loading...' : 'Sign Up'}
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleVerifyOtp} className="space-y-4">
+          <input
+            type="text"
+            required
+            className={inputClass}
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+          <button type="submit" disabled={loading} className={primaryButtonClass}>
+            {loading ? 'Verifying...' : 'Verify OTP'}
+          </button>
+        </form>
+      )}
+
+      <div className="text-center mt-5 text-sm">
+        <Link to="/login" className="text-gray-500 hover:text-violet-600">
+          Already have an account? <span className="font-medium text-violet-600">Login</span>
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 };
 
@@ -259,72 +263,57 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <h2 className="text-3xl font-bold text-center">
-          {!showOtpForm ? 'Forgot Password' : 'Reset Password'}
-        </h2>
-        {error && <div className="text-red-500 text-center">{error}</div>}
-        
-        {!showOtpForm ? (
-          <form onSubmit={handleForgotPassword} className="space-y-6">
-            <div>
-              <input
-                type="email"
-                required
-                className="w-full px-3 py-2 border rounded"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              {loading ? 'Sending...' : 'Send Reset OTP'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleResetPassword} className="space-y-6">
-            <div>
-              <input
-                type="text"
-                required
-                className="w-full px-3 py-2 border rounded"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                required
-                className="w-full px-3 py-2 border rounded"
-                placeholder="New Password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              {loading ? 'Resetting...' : 'Reset Password'}
-            </button>
-          </form>
-        )}
-        
-        <div className="text-center">
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Back-to-Login
-          </Link>
+    <AuthShell title={!showOtpForm ? 'Forgot Password' : 'Reset Password'}>
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm text-center py-2">
+          {error}
         </div>
+      )}
+
+      {!showOtpForm ? (
+        <form onSubmit={handleForgotPassword} className="space-y-4">
+          <input
+            type="email"
+            required
+            className={inputClass}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <button type="submit" disabled={loading} className={primaryButtonClass}>
+            {loading ? 'Sending...' : 'Send Reset OTP'}
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleResetPassword} className="space-y-4">
+          <input
+            type="text"
+            required
+            className={inputClass}
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+          <input
+            type="password"
+            required
+            className={inputClass}
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <button type="submit" disabled={loading} className={primaryButtonClass}>
+            {loading ? 'Resetting...' : 'Reset Password'}
+          </button>
+        </form>
+      )}
+
+      <div className="text-center mt-5 text-sm">
+        <Link to="/login" className="text-violet-600 hover:underline font-medium">
+          Back to Login
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 };
 
