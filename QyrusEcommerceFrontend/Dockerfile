@@ -19,6 +19,16 @@ ENV VITE_CSHARP_API_URL=${gateway_url}/csharp
 ENV VITE_PYTHON_API_URL=${gateway_url}/python
 ENV VITE_GATEWAY_TOKEN=$gateway_secret
 
+# Not wired into any logging call yet; inlined now so the frontend can push
+# logs to Logzio in the future without another Dockerfile/build-arg change.
+ARG LogzioUrl
+ARG LogzioToken
+ARG LogzioEnvironmentName
+
+ENV VITE_LOGZIO_URL=${LogzioUrl}
+ENV VITE_LOGZIO_TOKEN=${LogzioToken}
+ENV VITE_LOGZIO_ENVIRONMENT_NAME=${LogzioEnvironmentName}
+
 RUN npm run build
 
 # Runs on Fargate (or any plain container host) behind a load balancer;
