@@ -1,0 +1,10 @@
+QyrusEcommerceBackend/QartEnv/
+__pycache__/
+*.pyc
+
+# .NET build output
+bin/
+obj/
+
+# Java/Maven build output
+target/
