@@ -1,37 +1,51 @@
 using QyrusEcommerceCSharpBackend.Models;
 using QyrusEcommerceCSharpBackend.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace QyrusEcommerceCSharpBackend.Endpoints;
 
 public static class FavoritesEndpoints {
     public static void MapFavoritesEndpoints(this IEndpointRouteBuilder app) {
-        app.MapPost("/add-favorite/", (AddFavoriteInput req) => {
-            if (!DataStore.UsersDb.ContainsKey(req.Email)) return Results.Json(new { detail = "User not found" }, statusCode: 404);
-            var product = DataStore.ProductsDb.FirstOrDefault(p => p.Id == req.ProductId);
+        app.MapPost("/add-favorite/", async (AddFavoriteInput req, AppDbContext db) => {
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == req.Email);
+            if (user == null) return Results.Json(new { detail = "User not found" }, statusCode: 404);
+            var product = await db.Products.FirstOrDefaultAsync(p => p.Id == req.ProductId);
             if (product == null) return Results.Json(new { detail = "Product not found" }, statusCode: 404);
-            
-            if (!DataStore.FavoritesDb.ContainsKey(req.Email)) DataStore.FavoritesDb[req.Email] = new HashSet<int>();
-            DataStore.FavoritesDb[req.Email].Add(req.ProductId);
-            
-            return Results.Ok(new { message = "Product added to favorites successfully", favorites = DataStore.FavoritesDb[req.Email].ToList() });
+
+            if (!await db.Favorites.AnyAsync(f => f.UserId == user.Id && f.ProductId == req.ProductId)) {
+                db.Favorites.Add(new FavoriteEntity { UserId = user.Id, ProductId = req.ProductId });
+                await db.SaveChangesAsync();
+            }
+
+            var favorites = await db.Favorites.Where(f => f.UserId == user.Id).Select(f => f.ProductId).ToListAsync();
+            return Results.Ok(new { message = "Product added to favorites successfully", favorites = favorites });
         });
-        
-        app.MapGet("/get-favorites/", ([FromQuery] string email) => {
-            if (!DataStore.UsersDb.ContainsKey(email)) return Results.Json(new { detail = "User not found" }, statusCode: 404);
-            var userFavorites = DataStore.FavoritesDb.GetValueOrDefault(email, new HashSet<int>()).ToList();
-            return Results.Ok(new { email = email, favorites = userFavorites });
+
+        app.MapGet("/get-favorites/", async ([FromQuery] string email, AppDbContext db) => {
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null) return Results.Json(new { detail = "User not found" }, statusCode: 404);
+            var favorites = await db.Favorites.Where(f => f.UserId == user.Id).Select(f => f.ProductId).ToListAsync();
+            return Results.Ok(new { email = email, favorites = favorites });
         });
-        
-        app.MapDelete("/remove-favorite/", async (HttpRequest request) => {
+
+        app.MapDelete("/remove-favorite/", async (HttpRequest request, AppDbContext db) => {
             var body = await request.ReadFromJsonAsync<AddFavoriteInput>();
             if (body == null) return Results.BadRequest();
-            if (!DataStore.UsersDb.ContainsKey(body.Email)) return Results.Json(new { detail = "User not found" }, statusCode: 404);
-            if (!DataStore.FavoritesDb.ContainsKey(body.Email)) return Results.Json(new { detail = "No favorites found for this user" }, statusCode: 404);
-            if (!DataStore.FavoritesDb[body.Email].Contains(body.ProductId)) return Results.Json(new { detail = "Product not found in favorites" }, statusCode: 404);
-            
-            DataStore.FavoritesDb[body.Email].Remove(body.ProductId);
-            return Results.Ok(new { message = "Product removed from favorites successfully", favorites = DataStore.FavoritesDb[body.Email].ToList() });
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == body.Email);
+            if (user == null) return Results.Json(new { detail = "User not found" }, statusCode: 404);
+
+            var hasAny = await db.Favorites.AnyAsync(f => f.UserId == user.Id);
+            if (!hasAny) return Results.Json(new { detail = "No favorites found for this user" }, statusCode: 404);
+
+            var entity = await db.Favorites.FirstOrDefaultAsync(f => f.UserId == user.Id && f.ProductId == body.ProductId);
+            if (entity == null) return Results.Json(new { detail = "Product not found in favorites" }, statusCode: 404);
+
+            db.Favorites.Remove(entity);
+            await db.SaveChangesAsync();
+
+            var favorites = await db.Favorites.Where(f => f.UserId == user.Id).Select(f => f.ProductId).ToListAsync();
+            return Results.Ok(new { message = "Product removed from favorites successfully", favorites = favorites });
         });
     }
 }
