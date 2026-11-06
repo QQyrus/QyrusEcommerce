@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import Logo from './Logo';
 
 
 const Header = () => {
@@ -49,13 +50,15 @@ const Header = () => {
   }, []);
 
   const handleCategoryClick = (category) => {
+    setIsDropdownOpen(false);
     navigate(`/products?category=${category}&subcategory=none`);
   };
-  
+
   const handleSubcategoryClick = (category, subcategory) => {
+    setIsDropdownOpen(false);
     navigate(`/products?category=${category}&subcategory=${subcategory}`);
   };
-  
+
 
   // Toggle dropdown visibility
   const toggleDropdown = () => {
@@ -85,146 +88,169 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-blue-600 text-white p-4 shadow-md">
-      <div className="container mx-auto flex justify-between items-center">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <div className="container mx-auto flex items-center gap-4 px-4 py-3 md:px-6">
         {/* Logo */}
-        <button onClick={() => navigate('/products')} className="text-xl font-bold">
-          Qart
+        <button onClick={() => navigate('/products')} className="shrink-0">
+          <Logo size="sm" />
         </button>
 
         {/* Search Bar */}
-
         <form
-        onSubmit={handleSearch}
-        className="flex items-center space-x-4 bg-gray-100 p-2 rounded shadow relative md:w-1/2" // Full width
+          onSubmit={handleSearch}
+          className="relative flex flex-1 items-center max-w-2xl mx-auto"
         >
-        {/* Categories Dropdown */}
-        <div className="relative">
+          {/* Categories Dropdown */}
+          <div className="relative shrink-0">
             <button
-            onClick={toggleDropdown} // Toggle dropdown visibility
-            className="px-4 py-2 bg-white text-black rounded-l border border-gray-300"
+              type="button"
+              onClick={toggleDropdown} // Toggle dropdown visibility
+              className="flex items-center gap-1 h-11 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-l-full border border-r-0 border-gray-200 hover:bg-gray-200 transition-colors"
             >
-            Categories
+              Categories
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clipRule="evenodd" />
+              </svg>
             </button>
 
             {isDropdownOpen && (
-            <div className="absolute left-0 top-full mt-2 bg-white text-black shadow-lg rounded z-50">
+              <div className="absolute left-0 top-full mt-2 min-w-[12rem] bg-white text-gray-800 shadow-xl ring-1 ring-black/5 rounded-xl z-50 overflow-hidden animate-fade-in">
                 {Object.keys(categories).map((category) => (
-                <div
+                  <div
                     key={category}
                     className="relative group"
                     onMouseEnter={() => setHoveredCategory(category)} // Show subcategories
                     onMouseLeave={() => setHoveredCategory('')} // Hide subcategories
-                >
+                  >
                     <button
-                    onClick={() => handleCategoryClick(category)}
-                    className="block px-4 py-2 hover:bg-gray-200 w-full text-left"
+                      type="button"
+                      onClick={() => handleCategoryClick(category)}
+                      className="flex w-full items-center justify-between px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors text-left"
                     >
-                    {category}
+                      {category}
+                      {categories[category]?.length > 0 && (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-gray-400">
+                          <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clipRule="evenodd" />
+                        </svg>
+                      )}
                     </button>
                     {hoveredCategory === category && categories[category]?.length > 0 && (
-                    <div className="absolute left-full top-0 bg-white text-black shadow-lg rounded z-10">
+                      <div className="absolute left-full top-0 min-w-[12rem] bg-white text-gray-800 shadow-xl ring-1 ring-black/5 rounded-xl z-10 overflow-hidden">
                         {categories[category].map((subcategory) => (
-                        <button
+                          <button
                             key={subcategory}
                             onClick={() => handleSubcategoryClick(category, subcategory)}
-                            className="block px-4 py-2 hover:bg-gray-200 w-full text-left"
-                        >
+                            className="block w-full px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors text-left"
+                          >
                             {subcategory}
-                        </button>
+                          </button>
                         ))}
-                    </div>
+                      </div>
                     )}
-                </div>
+                  </div>
                 ))}
-            </div>
+              </div>
             )}
-        </div>
+          </div>
 
-        {/* Search Input */}
-        <input
+          {/* Search Input */}
+          <input
             type="text"
-            placeholder="Search products..."
-            className="p-2 border rounded flex-grow text-black"
+            placeholder="Search for products, brands and more..."
+            className="h-11 flex-grow border border-gray-200 px-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ minWidth: '300px' }}
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-r hover:bg-blue-700"
+            className="flex h-11 items-center justify-center rounded-r-full bg-violet-600 px-5 text-white hover:bg-violet-700 transition-colors"
+            aria-label="Search"
           >
-            Search
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4.5 w-4.5">
+              <circle cx="11" cy="11" r="7" />
+              <path strokeLinecap="round" d="m20 20-3-3" />
+            </svg>
           </button>
         </form>
 
 
         {/* Login Button */}
-        <nav className="flex space-x-6 items-center">
-        {!isLoggedIn ? (
-          <button
-            onClick={() => navigate('/login')}
-            className="px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-100"
+        <nav className="flex shrink-0 items-center gap-3 md:gap-4">
+          <Link
+            to="/select-backend"
+            className="hidden lg:inline text-xs font-medium text-gray-400 hover:text-violet-600 transition-colors"
           >
-            Login
-          </button>): (
+            Switch Backend
+          </Link>
+          {!isLoggedIn ? (
+            <button
+              onClick={() => navigate('/login')}
+              className="rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700 transition-colors"
+            >
+              Login
+            </button>
+          ) : (
             <>
               {/* Cart Icon */}
-              <Link to="/cart" className="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-              </svg>
-              {/* <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-              {cartItemCount || 0}
-            </span> */}
-
+              <Link
+                to="/cart"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 hover:text-violet-600 transition-colors"
+                aria-label="Cart"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-6 w-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                </svg>
               </Link>
 
               {/* Profile Dropdown */}
-              <div className="relative group">
-                <button className="flex items-center space-x-2" onClick={() => setAccountDropdownOpen((prev) => !prev)}>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <div className="relative">
+                <button
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 hover:text-violet-600 transition-colors"
+                  onClick={() => setAccountDropdownOpen((prev) => !prev)}
+                  aria-label="Account menu"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-6 w-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                   </svg>
                 </button>
                 {isaccountdropdownopen && (
-                <div className="absolute right-0 mt-2 bg-white text-black shadow-lg rounded w-48 z-50">
-                  <ul className="py-2">
-                    <li>
-                      <Link to="/account" className="block px-4 py-2 hover:bg-gray-200">
-                        Account
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/wishlist" className="block px-4 py-2 hover:bg-gray-200">
-                        Wishlist
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/my-orders" className="block px-4 py-2 hover:bg-gray-200">
-                        My Orders
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/contact" className="block px-4 py-2 hover:bg-gray-200">
-                        Contact Us
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/my-address" className="block px-4 py-2 hover:bg-gray-200">
-                        My Address
-                      </Link>
-                    </li>
-                    <li>
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-                      >
-                        Logout
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                  <div className="absolute right-0 mt-2 w-52 rounded-xl bg-white text-gray-800 shadow-xl ring-1 ring-black/5 z-50 overflow-hidden animate-fade-in">
+                    <ul className="py-1.5">
+                      <li>
+                        <Link to="/account" className="block px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                          Account
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/wishlist" className="block px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                          Wishlist
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/my-orders" className="block px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                          My Orders
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/contact" className="block px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                          Contact Us
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/my-address" className="block px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                          My Address
+                        </Link>
+                      </li>
+                      <li className="border-t border-gray-100 mt-1">
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 )}
               </div>
             </>

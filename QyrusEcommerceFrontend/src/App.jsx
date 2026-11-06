@@ -16,6 +16,8 @@ import PaymentPage from "./components/PaymentsPage";
 import MyOrders from "./components/MyOrders";
 import ComparePage from "./components/ComparePage";
 import TermsAndConditions from "./components/TermsAndConditions";
+import BackendSelector from "./components/BackendSelector";
+import { getSelectedBackend } from "./services/api";
 
 
 const App = () => {
@@ -29,7 +31,11 @@ const App = () => {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/products" element={<Products />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/" element={<Navigate to="/products" replace />} />
+        <Route path="/select-backend" element={<BackendSelector />} />
+        <Route
+          path="/"
+          element={<Navigate to={getSelectedBackend() ? "/products" : "/select-backend"} replace />}
+        />
         <Route path="/product/:productId" element={<ProductDetails />} /> {/* Product Details Route */}
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />

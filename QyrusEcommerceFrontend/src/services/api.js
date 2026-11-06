@@ -1,20 +1,66 @@
 // src/services/api.js
 import axios from 'axios';
 
+// Each backend's URL already points at its context path behind the gateway
+// (e.g. `${GATEWAY_URL}/java`), baked in at Docker build time.
+const GATEWAY_TOKEN = import.meta.env.VITE_GATEWAY_TOKEN;
+
+// The gateway secret may or may not already include the "Bearer " prefix.
+const GATEWAY_AUTH_HEADER = GATEWAY_TOKEN
+  ? (GATEWAY_TOKEN.startsWith('Bearer ') ? GATEWAY_TOKEN : `Bearer ${GATEWAY_TOKEN}`)
+  : undefined;
+
+// Each backend implements the same REST contract; the user picks which one
+// the UI talks to on the "/select-backend" page.
+export const BACKENDS = {
+  java: {
+    label: 'Java (Spring Boot)',
+    url: import.meta.env.VITE_JAVA_API_URL || 'http://localhost:9893',
+  },
+  csharp: {
+    label: 'C# (.NET)',
+    url: import.meta.env.VITE_CSHARP_API_URL || 'http://localhost:9892',
+  },
+  python: {
+    label: 'Python (FastAPI)',
+    url: import.meta.env.VITE_PYTHON_API_URL || 'http://localhost:9891',
+  },
+};
+
+const BACKEND_STORAGE_KEY = 'selectedBackend';
+
+export const getSelectedBackend = () => localStorage.getItem(BACKEND_STORAGE_KEY);
+
+export const setSelectedBackend = (key) => {
+  if (!BACKENDS[key]) throw new Error(`Unknown backend: ${key}`);
+  localStorage.setItem(BACKEND_STORAGE_KEY, key);
+  api.defaults.baseURL = BACKENDS[key].url;
+};
+
+const initialBackend = getSelectedBackend();
+
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: 'https://testui-qyrusbot.qyrus.com/qart-java', // Change this to your API base URL
+  baseURL: BACKENDS[initialBackend]?.url || BACKENDS.java.url,
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Add token to requests if it exists
+// Authorization carries the gateway token so requests can pass through the
+// gateway to reach the backends. The per-user token (set after login/signup)
+// isn't read by any backend today, but is still forwarded in a custom header
+// in case that changes.
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (GATEWAY_AUTH_HEADER) {
+    config.headers.Authorization = GATEWAY_AUTH_HEADER;
   }
+
+  const userToken = localStorage.getItem('token');
+  if (userToken) {
+    config.headers['X-User-Token'] = userToken;
+  }
+
   return config;
 });
 

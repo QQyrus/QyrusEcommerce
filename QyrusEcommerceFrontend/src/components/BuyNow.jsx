@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { authAPI } from "../services/api";
 import { useUser } from "../context/UserContext";
 import { useLocation, useNavigate } from 'react-router-dom';
+import PageHeader from './PageHeader';
+import CheckoutSteps from './CheckoutSteps';
 
 
 const AddressSelection = () => {
@@ -64,85 +66,103 @@ const AddressSelection = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Select Address</h1>
-      {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader
+        icon="📍"
+        eyebrow="Checkout"
+        title="Select a delivery address"
+        subtitle="Choose where you'd like your order delivered."
+      />
 
-      {loading ? (
-        <p className="text-center">Loading addresses...</p>
-      ) : (
-        <div className="space-y-4">
-          {addresses.map((address) => (
-            <div
-              key={address.address_id}
-              className="flex items-center p-4 border rounded-lg shadow hover:shadow-lg transition"
+      <div className="container mx-auto px-4 md:px-6 py-10 max-w-2xl">
+        <CheckoutSteps current="Address" />
+
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm text-center py-2">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <p className="text-center text-gray-500">Loading addresses...</p>
+        ) : (
+          <div className="space-y-3">
+            {addresses.map((address) => (
+              <label
+                key={address.address_id}
+                className={`flex items-center gap-4 p-4 rounded-xl border bg-white cursor-pointer transition-all ${
+                  selectedAddressId === address.address_id
+                    ? 'border-violet-500 ring-2 ring-violet-100'
+                    : 'border-gray-100 hover:border-gray-200 shadow-sm'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="address"
+                  value={address.address_id}
+                  checked={selectedAddressId === address.address_id}
+                  onChange={() => setSelectedAddressId(address.address_id)}
+                  className="h-4 w-4 text-violet-600 focus:ring-violet-500"
+                />
+                <p className="text-gray-700 text-sm whitespace-pre-line">{address.address}</p>
+              </label>
+            ))}
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="block w-full p-4 rounded-xl border-2 border-dashed border-gray-200 text-center text-sm font-medium text-violet-600 hover:bg-violet-50 hover:border-violet-300 transition-colors"
             >
-              <input
-                type="radio"
-                name="address"
-                value={address.address_id}
-                checked={selectedAddressId === address.address_id}
-                onChange={() => setSelectedAddressId(address.address_id)}
-                className="mr-4"
-              />
-              <p className="text-gray-800 text-lg whitespace-pre-line">{address.address}</p>
-            </div>
-          ))}
+              + Add New Address
+            </button>
+          </div>
+        )}
 
+        <div className="mt-8 flex justify-center gap-4">
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="block w-full p-4 border rounded-lg shadow text-center text-blue-600 hover:bg-blue-100"
+            onClick={() => navigate(-1)}
+            className="rounded-full bg-gray-100 text-gray-700 font-semibold px-6 py-3 hover:bg-gray-200 transition-colors"
           >
-            + Add New Address
+            Back
+          </button>
+          <button
+            disabled={!selectedAddressId}
+            onClick={handleNext}
+            className="rounded-full bg-violet-600 text-white font-semibold px-6 py-3 hover:bg-violet-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            Continue to Payment
           </button>
         </div>
-      )}
 
-      <div className="mt-6 text-center space-x-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="px-6 py-3 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
-        >
-          Back
-        </button>
-        <button
-          disabled={!selectedAddressId}
-          onClick={handleNext}
-          className="px-6 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          Next 
-        </button>
-      </div>
-
-      {/* Add Address Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-center">Add New Address</h2>
-            <textarea
-              value={newAddress}
-              onChange={(e) => setNewAddress(e.target.value)}
-              className="w-full p-3 border rounded mb-4 resize-none"
-              rows="4"
-              placeholder="Enter your new address here..."
-            ></textarea>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={handleAddAddress}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
+        {/* Add Address Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+            <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
+              <h2 className="text-lg font-bold text-gray-900 mb-4 text-center">Add New Address</h2>
+              <textarea
+                value={newAddress}
+                onChange={(e) => setNewAddress(e.target.value)}
+                className="w-full p-3 rounded-xl border border-gray-200 mb-4 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                rows="4"
+                placeholder="Enter your new address here..."
+              ></textarea>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleAddAddress}
+                  className="rounded-full bg-violet-600 text-white font-semibold px-5 py-2 text-sm hover:bg-violet-700 transition-colors"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="rounded-full bg-gray-100 text-gray-700 font-semibold px-5 py-2 text-sm hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { authAPI } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import PageHeader from './PageHeader';
+import EmptyState from './EmptyState';
 
 const Wishlist = () => {
   const [favorites, setFavorites] = useState([]);
@@ -53,45 +55,74 @@ const Wishlist = () => {
     }
   };
 
-  if (loading) return <div>Loading wishlist...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">My Wishlist</h1>
-      {favorites.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {favorites.map((product) => (
-            <div
-              key={product.id}
-              className="p-4 border rounded shadow hover:shadow-lg transition"
-            >
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-40 object-cover rounded cursor-pointer"
-                onClick={() =>
-                  navigate(`/product/${product.id}`, {
-                    state: { previousPath: "/wishlist" },
-                  })
-                }
-              />
-              <h2 className="text-xl font-bold mt-2">{product.name}</h2>
-              <p className="text-gray-700 font-bold">Price: ${product.price}</p>
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader
+        icon="❤️"
+        eyebrow="Saved for later"
+        title="My Wishlist"
+        subtitle="Everything you've favorited, all in one place."
+      />
 
-              {/* Remove button */}
-              <button
-                onClick={() => handleRemoveFavorite(product.id)}
-                className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      <div className="container mx-auto px-4 md:px-6 py-10">
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-white border border-gray-100 overflow-hidden animate-pulse">
+                <div className="aspect-square bg-gray-200" />
+                <div className="p-3.5 space-y-2">
+                  <div className="h-3.5 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3.5 bg-gray-200 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="rounded-xl bg-red-50 border border-red-100 text-red-600 text-center py-3 px-4">{error}</div>
+        ) : favorites.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+            {favorites.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all"
               >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>Your wishlist is empty.</p>
-      )}
+                <div className="aspect-square bg-gray-100 overflow-hidden">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="h-full w-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                    onClick={() =>
+                      navigate(`/product/${product.id}`, {
+                        state: { previousPath: "/wishlist" },
+                      })
+                    }
+                  />
+                </div>
+                <div className="p-3.5">
+                  <h2 className="font-semibold text-sm text-gray-800 truncate">{product.name}</h2>
+                  <p className="mt-1 font-bold text-gray-900">${product.price}</p>
+
+                  {/* Remove button */}
+                  <button
+                    onClick={() => handleRemoveFavorite(product.id)}
+                    className="mt-2 w-full rounded-full bg-red-50 text-red-600 text-sm font-semibold py-2 hover:bg-red-100 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon="💔"
+            title="Your wishlist is empty"
+            subtitle="Tap the heart icon on any product to save it here for later."
+            actionLabel="Browse Products"
+            onAction={() => navigate('/products')}
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { authAPI } from "../services/api";
-import Header from "./Header"; // Reuse the same header component
 import { useUser } from '../context/UserContext';
+import PageHeader from './PageHeader';
+
+const fieldInputClass =
+  "p-2.5 border border-gray-200 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500";
 
 const AccountPage = () => {
   const [accountDetails, setAccountDetails] = useState(null);
@@ -57,121 +60,118 @@ const AccountPage = () => {
     }
   };
 
-  if (!accountDetails) return <div>Loading...</div>;
+  const initials = (accountDetails?.name || email || '?').trim().charAt(0).toUpperCase();
+
+  const Field = ({ label, name, type = "text" }) => (
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
+      {isEditing ? (
+        name === "country" ? (
+          <select
+            name={name}
+            value={formData[name]}
+            onChange={handleInputChange}
+            className={fieldInputClass}
+          >
+            {countries.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            name={name}
+            value={formData[name]}
+            onChange={handleInputChange}
+            className={fieldInputClass}
+          />
+        )
+      ) : (
+        <p className="text-gray-900 py-2">{accountDetails?.[name] || '—'}</p>
+      )}
+    </div>
+  );
 
   return (
-    <div>
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-4">
-          {/* Title */}
-          <h1 className="text-3xl font-bold">Account Details</h1>
-          
-          {/* Edit Button */}
-          {!isEditing && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
-            >
-              Edit
-            </button>
-          )}
-        </div>
-        
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-  
-        <div className="space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block font-bold">Name</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="p-2 border rounded w-full"
-              />
-            ) : (
-              <p>{accountDetails.name}</p>
-            )}
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader icon="👤" eyebrow="Your profile" title="Account Details" subtitle={email} />
+
+      <div className="container mx-auto px-4 md:px-6 py-10 max-w-2xl">
+        {!accountDetails ? (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/3" />
+            <div className="h-10 bg-gray-200 rounded" />
+            <div className="h-10 bg-gray-200 rounded" />
           </div>
-  
-          {/* Age */}
-          <div>
-            <label className="block font-bold">Age</label>
-            {isEditing ? (
-              <input
-                type="number"
-                name="age"
-                value={formData.age}
-                onChange={handleInputChange}
-                className="p-2 border rounded w-full"
-              />
-            ) : (
-              <p>{accountDetails.age}</p>
-            )}
-          </div>
-  
-          {/* Phone */}
-          <div>
-            <label className="block font-bold">Phone</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="p-2 border rounded w-full"
-              />
-            ) : (
-              <p>{accountDetails.phone}</p>
-            )}
-          </div>
-  
-          {/* Country */}
-          <div>
-            <label className="block font-bold">Country</label>
-            {isEditing ? (
-              <select
-                name="country"
-                value={formData.country}
-                onChange={handleInputChange}
-                className="p-2 border rounded w-full"
-              >
-                {countries.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p>{accountDetails.country}</p>
-            )}
-          </div>
-  
-          {/* Save and Cancel Buttons */}
-          {isEditing && (
-            <div className="flex space-x-4 mt-4">
-              <button
-                onClick={handleUpdate}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                disabled={loading}
-              >
-                {loading ? "Saving..." : "Save"}
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-4">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white text-xl font-bold shadow-sm">
+                  {initials}
+                </span>
+                <div>
+                  <p className="font-bold text-gray-900">{accountDetails.name || 'Your Account'}</p>
+                  <p className="text-sm text-gray-500">{email}</p>
+                </div>
+              </div>
+
+              {/* Edit Button */}
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="rounded-full bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 hover:bg-gray-200 transition-colors"
+                >
+                  Edit
+                </button>
+              )}
             </div>
-          )}
-        </div>
+
+            {error && (
+              <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm text-center py-2">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-5 divide-y divide-gray-100">
+              <Field label="Name" name="name" />
+              <div className="pt-5">
+                <Field label="Age" name="age" type="number" />
+              </div>
+              <div className="pt-5">
+                <Field label="Phone" name="phone" />
+              </div>
+              <div className="pt-5">
+                <Field label="Country" name="country" />
+              </div>
+
+              {/* Save and Cancel Buttons */}
+              {isEditing && (
+                <div className="flex gap-3 pt-5">
+                  <button
+                    onClick={handleUpdate}
+                    className="rounded-full bg-violet-600 text-white font-semibold px-5 py-2.5 hover:bg-violet-700 disabled:opacity-60 transition-colors"
+                    disabled={loading}
+                  >
+                    {loading ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="rounded-full bg-gray-100 text-gray-700 font-semibold px-5 py-2.5 hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-  
+
 };
 
 export default AccountPage;
