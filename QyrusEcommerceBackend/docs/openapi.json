@@ -1,1308 +1,692 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.3",
   "info": {
-    "title": "FastAPI",
-    "version": "0.1.0"
+    "title": "Qyrus Ecommerce API",
+    "description": "Common API contract shared by the Python (FastAPI), Java (Spring Boot) and C# (ASP.NET Core) backend implementations of the Qyrus Ecommerce sample application.",
+    "version": "1.0.0"
   },
+  "tags": [
+    { "name": "Auth" },
+    { "name": "Products" },
+    { "name": "Account" },
+    { "name": "Cart" },
+    { "name": "Favorites" },
+    { "name": "Orders" },
+    { "name": "Addresses" },
+    { "name": "Contact" }
+  ],
   "paths": {
     "/auth/login/": {
       "post": {
-        "summary": "Login",
-        "operationId": "login_auth_login__post",
+        "tags": ["Auth"],
+        "summary": "Log in with email and password",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Login successful", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MessageResponse" } } } },
+          "401": { "description": "Invalid credentials", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/auth/signup/": {
       "post": {
-        "summary": "Signup",
-        "operationId": "signup_auth_signup__post",
+        "tags": ["Auth"],
+        "summary": "Create a new account and send a verification token",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SignupRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignupRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Signup successful", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenMessageResponse" } } } },
+          "400": { "description": "Email already registered", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/auth/verify-email/": {
       "post": {
-        "summary": "Verify Email",
-        "operationId": "verify_email_auth_verify_email__post",
+        "tags": ["Auth"],
+        "summary": "Verify an account using the OTP and token sent at signup",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VerifyEmailRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VerifyEmailRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Email verified", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MessageResponse" } } } },
+          "400": { "description": "Invalid OTP or token", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/auth/forgot-password/": {
       "post": {
-        "summary": "Forgot Password",
-        "operationId": "forgot_password_auth_forgot_password__post",
+        "tags": ["Auth"],
+        "summary": "Request a password reset token",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ForgotPasswordRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Reset token issued", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenMessageResponse" } } } },
+          "404": { "description": "Email not registered", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/auth/reset-password/": {
       "post": {
-        "summary": "Reset Password",
-        "operationId": "reset_password_auth_reset_password__post",
+        "tags": ["Auth"],
+        "summary": "Reset the account password using the OTP and token",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetPasswordRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ResetPasswordRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Password reset", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MessageResponse" } } } },
+          "400": { "description": "Invalid OTP or token", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/get-products/": {
       "get": {
-        "summary": "Get Products",
-        "operationId": "get_products_get_products__get",
+        "tags": ["Products"],
+        "summary": "List products by category/subcategory, paginated",
         "parameters": [
-          {
-            "name": "category",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Category"
-            }
-          },
-          {
-            "name": "subcategory",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Subcategory"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Page"
-            }
-          }
+          { "name": "category", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "subcategory", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 1 } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Paginated product list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProductListResponse" } } } }
         }
       }
     },
     "/search-products/": {
       "get": {
-        "summary": "Search Products",
-        "operationId": "search_products_search_products__get",
+        "tags": ["Products"],
+        "summary": "Search products by name (case-insensitive substring match)",
         "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Query"
-            }
-          }
+          { "name": "query", "in": "query", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Matching products", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProductSearchResponse" } } } }
         }
       }
     },
     "/get-product-categories/": {
       "get": {
-        "summary": "Get Product Categories",
-        "operationId": "get_product_categories_get_product_categories__get",
+        "tags": ["Products"],
+        "summary": "Get the static category/subcategory tree",
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
+          "200": { "description": "Category map", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CategoriesResponse" } } } }
         }
       }
     },
-    "/get-product-details/{product_id}": {
+    "/get-product-details/{productId}": {
       "get": {
-        "summary": "Get Product Details",
-        "operationId": "get_product_details_get_product_details__product_id__get",
+        "tags": ["Products"],
+        "summary": "Get full details for a single product",
         "parameters": [
-          {
-            "name": "product_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Product Id"
-            }
-          }
+          { "name": "productId", "in": "path", "required": true, "schema": { "type": "integer" } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Product details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Product" } } } },
+          "404": { "description": "Product not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/get-account-details/": {
       "get": {
-        "summary": "Get Account Details",
-        "operationId": "get_account_details_get_account_details__get",
+        "tags": ["Account"],
+        "summary": "Get account profile details",
         "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email",
-              "title": "Email"
-            }
-          }
+          { "name": "email", "in": "query", "required": true, "schema": { "type": "string", "format": "email" } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Account details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AccountDetails" } } } },
+          "404": { "description": "Account details not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/update-account-details/": {
       "post": {
-        "summary": "Update Account Details",
-        "operationId": "update_account_details_update_account_details__post",
+        "tags": ["Account"],
+        "summary": "Update account profile details",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAccountDetailsRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateAccountDetailsRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/add-to-cart/": {
-      "post": {
-        "summary": "Add To Cart",
-        "operationId": "add_to_cart_add_to_cart__post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddToCartRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/record-contact/": {
-      "post": {
-        "summary": "Record Contact",
-        "operationId": "record_contact_record_contact__post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordContactRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Updated details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateAccountDetailsResponse" } } } },
+          "404": { "description": "Account not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/get-cart/": {
       "get": {
-        "summary": "Get Cart",
-        "operationId": "get_cart_get_cart__get",
+        "tags": ["Cart"],
+        "summary": "Get the current user's cart, enriched with product details",
         "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email",
-              "title": "Email"
-            }
-          }
+          { "name": "email", "in": "query", "required": true, "schema": { "type": "string", "format": "email" } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Cart contents", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CartResponse" } } } },
+          "404": { "description": "User not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/add-to-cart/": {
+      "post": {
+        "tags": ["Cart"],
+        "summary": "Add an item to the cart",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AddToCartRequest" } } }
+        },
+        "responses": {
+          "200": { "description": "Updated cart", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CartMessageResponse" } } } },
+          "404": { "description": "User or product not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/remove-from-cart/": {
       "delete": {
-        "summary": "Remove From Cart",
-        "operationId": "remove_from_cart_remove_from_cart__delete",
+        "tags": ["Cart"],
+        "summary": "Remove an item from the cart",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RemoveFromCartRequest" } } }
+        },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
+          "200": { "description": "Updated cart", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CartMessageResponse" } } } },
+          "404": { "description": "User, cart or item not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/add-favorite/": {
       "post": {
-        "summary": "Add Favorite",
-        "operationId": "add_favorite_add_favorite__post",
+        "tags": ["Favorites"],
+        "summary": "Add a product to favorites",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddFavoriteInput"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FavoriteRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Updated favorites list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FavoritesMessageResponse" } } } },
+          "404": { "description": "User or product not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/get-favorites/": {
       "get": {
-        "summary": "Get Favorites",
-        "operationId": "get_favorites_get_favorites__get",
+        "tags": ["Favorites"],
+        "summary": "Get the current user's favorite product ids",
         "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email",
-              "title": "Email"
-            }
-          }
+          { "name": "email", "in": "query", "required": true, "schema": { "type": "string", "format": "email" } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Favorites list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FavoritesResponse" } } } },
+          "404": { "description": "User not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/remove-favorite/": {
       "delete": {
-        "summary": "Remove Favorite",
-        "operationId": "remove_favorite_remove_favorite__delete",
+        "tags": ["Favorites"],
+        "summary": "Remove a product from favorites",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddFavoriteInput"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FavoriteRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Updated favorites list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FavoritesMessageResponse" } } } },
+          "404": { "description": "User, favorites or product not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/create-address/": {
       "post": {
-        "summary": "Create Address",
-        "operationId": "create_address_create_address__post",
+        "tags": ["Addresses"],
+        "summary": "Add a new address for the user",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAddressRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateAddressRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Updated address list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateAddressResponse" } } } },
+          "404": { "description": "User not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/get-addresses/": {
       "get": {
-        "summary": "Get Addresses",
-        "operationId": "get_addresses_get_addresses__get",
+        "tags": ["Addresses"],
+        "summary": "Get the user's saved addresses",
         "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email",
-              "title": "Email"
-            }
-          }
+          { "name": "email", "in": "query", "required": true, "schema": { "type": "string", "format": "email" } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Address list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AddressesResponse" } } } },
+          "404": { "description": "User not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/delete-address/": {
       "delete": {
-        "summary": "Delete Address",
-        "operationId": "delete_address_delete_address__delete",
+        "tags": ["Addresses"],
+        "summary": "Delete a saved address",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeleteAddressRequest" } } }
+        },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
+          "200": { "description": "Updated address list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AddressesResponse" } } } },
+          "404": { "description": "User or address not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/update-address/": {
       "put": {
-        "summary": "Update Address",
-        "operationId": "update_address_update_address__put",
+        "tags": ["Addresses"],
+        "summary": "Update a saved address",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAddressRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateAddressRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Updated address list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AddressesResponse" } } } },
+          "404": { "description": "User or address not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/create-order/": {
       "post": {
-        "summary": "Create Order",
-        "operationId": "create_order_create_order__post",
+        "tags": ["Orders"],
+        "summary": "Place a new order",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrderRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateOrderRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Order created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrderStatusResponse" } } } },
+          "404": { "description": "User, address or product not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/get-orders/": {
       "get": {
-        "summary": "Get Orders",
-        "operationId": "get_orders_get_orders__get",
+        "tags": ["Orders"],
+        "summary": "Get the user's order history",
         "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email",
-              "title": "Email"
-            }
-          }
+          { "name": "email", "in": "query", "required": true, "schema": { "type": "string", "format": "email" } }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Order list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrdersResponse" } } } },
+          "404": { "description": "User not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/cancel-order/": {
       "post": {
-        "summary": "Cancel Order",
-        "operationId": "cancel_order_cancel_order__post",
+        "tags": ["Orders"],
+        "summary": "Cancel an existing order",
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CancelOrderRequest"
-              }
-            }
-          },
-          "required": true
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CancelOrderRequest" } } }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
+          "200": { "description": "Order cancelled", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrderStatusResponse" } } } },
+          "400": { "description": "Order already cancelled", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "User or order not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/record-contact/": {
+      "post": {
+        "tags": ["Contact"],
+        "summary": "Record a contact-us message",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RecordContactRequest" } } }
+        },
+        "responses": {
+          "200": { "description": "Contact recorded", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ContactResponse" } } } }
         }
       }
     }
   },
   "components": {
     "schemas": {
-      "AddFavoriteInput": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "product_id": {
-            "type": "integer",
-            "title": "Product Id"
-          }
-        },
+      "ErrorResponse": {
         "type": "object",
-        "required": [
-          "email",
-          "product_id"
-        ],
-        "title": "AddFavoriteInput",
-        "example": {
-          "email": "user@example.com",
-          "product_id": 123
-        }
+        "properties": { "detail": { "type": "string" } }
       },
-      "AddToCartRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "product_id": {
-            "type": "integer",
-            "title": "Product Id"
-          },
-          "color": {
-            "type": "string",
-            "title": "Color"
-          },
-          "provider": {
-            "type": "string",
-            "title": "Provider"
-          },
-          "size": {
-            "type": "string",
-            "title": "Size"
-          },
-          "quantity": {
-            "type": "integer",
-            "title": "Quantity"
-          }
-        },
+      "MessageResponse": {
         "type": "object",
-        "required": [
-          "email",
-          "product_id",
-          "color",
-          "provider",
-          "size",
-          "quantity"
-        ],
-        "title": "AddToCartRequest",
-        "example": {
-          "color": "black",
-          "email": "user@example.com",
-          "product_id": 123,
-          "provider": "Brand A",
-          "quantity": 2,
-          "size": "M"
-        }
+        "properties": { "message": { "type": "string" } }
       },
-      "CancelOrderRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "orderId": {
-            "type": "string",
-            "title": "Orderid"
-          }
-        },
+      "TokenMessageResponse": {
         "type": "object",
-        "required": [
-          "email",
-          "orderId"
-        ],
-        "title": "CancelOrderRequest",
-        "example": {
-          "email": "user@example.com",
-          "orderId": "order_123456789"
+        "properties": {
+          "message": { "type": "string" },
+          "token": { "type": "string", "format": "uuid" }
         }
-      },
-      "CreateAddressRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "address": {
-            "type": "string",
-            "title": "Address"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "address"
-        ],
-        "title": "CreateAddressRequest",
-        "example": {
-          "address": "123 Main St, City, Country, 12345",
-          "email": "user@example.com"
-        }
-      },
-      "CreateOrderRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "addressId": {
-            "type": "string",
-            "title": "Addressid"
-          },
-          "products": {
-            "items": {},
-            "type": "array",
-            "title": "Products"
-          },
-          "paymentMethod": {
-            "type": "string",
-            "title": "Paymentmethod"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "addressId",
-          "products",
-          "paymentMethod"
-        ],
-        "title": "CreateOrderRequest",
-        "example": {
-          "addressId": "addr_123456789",
-          "email": "user@example.com",
-          "paymentMethod": "credit_card",
-          "products": [
-            {
-              "color": "black",
-              "id": 1,
-              "provider": "Brand A",
-              "quantity": 2,
-              "size": "M"
-            },
-            {
-              "color": "white",
-              "id": 3,
-              "provider": "Brand B",
-              "quantity": 1,
-              "size": "L"
-            }
-          ]
-        }
-      },
-      "ForgotPasswordRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email"
-        ],
-        "title": "ForgotPasswordRequest",
-        "example": {
-          "email": "user@example.com"
-        }
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
       },
       "LoginRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          }
-        },
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "LoginRequest",
-        "example": {
-          "email": "user@example.com",
-          "password": "password123"
-        }
-      },
-      "RecordContactRequest": {
+        "required": ["email", "password"],
         "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "comments": {
-            "type": "string",
-            "title": "Comments"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "comments"
-        ],
-        "title": "RecordContactRequest",
-        "example": {
-          "comments": "I have a question about my order.",
-          "email": "user@example.com"
-        }
-      },
-      "ResetPasswordRequest": {
-        "properties": {
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "otp": {
-            "type": "string",
-            "title": "Otp"
-          },
-          "token": {
-            "type": "string",
-            "title": "Token"
-          }
-        },
-        "type": "object",
-        "required": [
-          "password",
-          "otp",
-          "token"
-        ],
-        "title": "ResetPasswordRequest",
-        "example": {
-          "otp": "123456",
-          "password": "newpassword123",
-          "token": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
         }
       },
       "SignupRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          }
-        },
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "SignupRequest",
-        "example": {
-          "email": "user@example.com",
-          "password": "password123"
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
+        }
+      },
+      "VerifyEmailRequest": {
+        "type": "object",
+        "required": ["otp", "token"],
+        "properties": {
+          "otp": { "type": "string" },
+          "token": { "type": "string" }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": { "email": { "type": "string", "format": "email" } }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": ["password", "otp", "token"],
+        "properties": {
+          "password": { "type": "string" },
+          "otp": { "type": "string" },
+          "token": { "type": "string" }
+        }
+      },
+      "ProductColor": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "hex": { "type": "string" }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "price": { "type": "number", "format": "double" },
+          "image": { "type": "string" },
+          "category": { "type": "string" },
+          "subcategory": { "type": "string" },
+          "sizes": { "type": "array", "items": { "type": "string" } },
+          "colors": { "type": "array", "items": { "$ref": "#/components/schemas/ProductColor" } },
+          "providers": { "type": "array", "items": { "type": "string" } },
+          "description": { "type": "string" },
+          "rating": { "type": "number", "format": "double" },
+          "comments": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "ProductSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "price": { "type": "number", "format": "double" },
+          "image": { "type": "string" },
+          "category": { "type": "string" },
+          "subcategory": { "type": "string" }
+        }
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "properties": {
+          "products": { "type": "array", "items": { "$ref": "#/components/schemas/ProductSummary" } },
+          "total_pages": { "type": "integer" }
+        }
+      },
+      "ProductSearchResponse": {
+        "type": "object",
+        "properties": {
+          "products": { "type": "array", "items": { "$ref": "#/components/schemas/ProductSummary" } }
+        }
+      },
+      "CategoriesResponse": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "object",
+            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "AccountDetails": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "name": { "type": "string" },
+          "age": { "type": "integer", "nullable": true },
+          "country": { "type": "string" },
+          "phone": { "type": "string" }
         }
       },
       "UpdateAccountDetailsRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "phone": {
-            "type": "string",
-            "title": "Phone"
-          },
-          "age": {
-            "type": "integer",
-            "title": "Age"
-          },
-          "country": {
-            "type": "string",
-            "title": "Country"
-          }
-        },
         "type": "object",
-        "required": [
-          "email",
-          "name",
-          "phone",
-          "age",
-          "country"
-        ],
-        "title": "UpdateAccountDetailsRequest",
-        "example": {
-          "age": 30,
-          "country": "United States",
-          "email": "user@example.com",
-          "name": "John Doe",
-          "phone": "1234567890"
+        "required": ["email", "name", "phone", "age", "country"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "name": { "type": "string" },
+          "phone": { "type": "string" },
+          "age": { "type": "integer" },
+          "country": { "type": "string" }
+        }
+      },
+      "UpdateAccountDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "updated_details": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "phone": { "type": "string" },
+              "age": { "type": "integer" },
+              "country": { "type": "string" }
+            }
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "cart_item_id": { "type": "string", "format": "uuid" },
+          "product_id": { "type": "integer" },
+          "name": { "type": "string" },
+          "price": { "type": "number", "format": "double" },
+          "image": { "type": "string" },
+          "color": { "type": "string" },
+          "provider": { "type": "string" },
+          "size": { "type": "string" },
+          "quantity": { "type": "integer" }
+        }
+      },
+      "AddToCartRequest": {
+        "type": "object",
+        "required": ["email", "product_id", "color", "provider", "size", "quantity"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "product_id": { "type": "integer" },
+          "color": { "type": "string" },
+          "provider": { "type": "string" },
+          "size": { "type": "string" },
+          "quantity": { "type": "integer", "minimum": 1 }
+        }
+      },
+      "RemoveFromCartRequest": {
+        "type": "object",
+        "required": ["email", "cart_item_id"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "cart_item_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "CartResponse": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "cart": { "type": "array", "items": { "$ref": "#/components/schemas/CartItem" } }
+        }
+      },
+      "CartMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "cart": { "type": "array", "items": { "$ref": "#/components/schemas/CartItem" } }
+        }
+      },
+      "FavoriteRequest": {
+        "type": "object",
+        "required": ["email", "product_id"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "product_id": { "type": "integer" }
+        }
+      },
+      "FavoritesResponse": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "favorites": { "type": "array", "items": { "type": "integer" } }
+        }
+      },
+      "FavoritesMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "favorites": { "type": "array", "items": { "type": "integer" } }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "address_id": { "type": "string", "format": "uuid" },
+          "address": { "type": "string" }
+        }
+      },
+      "CreateAddressRequest": {
+        "type": "object",
+        "required": ["email", "address"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "address": { "type": "string" }
+        }
+      },
+      "CreateAddressResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "address_id": { "type": "string", "format": "uuid" },
+          "addresses": { "type": "array", "items": { "$ref": "#/components/schemas/Address" } }
+        }
+      },
+      "AddressesResponse": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "addresses": { "type": "array", "items": { "$ref": "#/components/schemas/Address" } },
+          "message": { "type": "string" }
+        }
+      },
+      "DeleteAddressRequest": {
+        "type": "object",
+        "required": ["email", "addressId"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "addressId": { "type": "string", "format": "uuid" }
         }
       },
       "UpdateAddressRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "addressId": {
-            "type": "string",
-            "title": "Addressid"
-          },
-          "newAddress": {
-            "type": "string",
-            "title": "Newaddress"
-          }
-        },
         "type": "object",
-        "required": [
-          "email",
-          "addressId",
-          "newAddress"
-        ],
-        "title": "UpdateAddressRequest",
-        "example": {
-          "addressId": "addr_123456789",
-          "email": "user@example.com",
-          "newAddress": "456 New St, City, Country, 54321"
+        "required": ["email", "addressId", "newAddress"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "addressId": { "type": "string", "format": "uuid" },
+          "newAddress": { "type": "string" }
         }
       },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          }
-        },
+      "OrderProductItem": {
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError"
+        "properties": {
+          "productId": { "type": "integer" },
+          "quantity": { "type": "integer" },
+          "color": { "type": "string" },
+          "size": { "type": "string" },
+          "provider": { "type": "string" }
+        }
       },
-      "VerifyEmailRequest": {
-        "properties": {
-          "otp": {
-            "type": "string",
-            "title": "Otp"
-          },
-          "token": {
-            "type": "string",
-            "title": "Token"
-          }
-        },
+      "CreateOrderRequest": {
         "type": "object",
-        "required": [
-          "otp",
-          "token"
-        ],
-        "title": "VerifyEmailRequest",
-        "example": {
-          "otp": "123456",
-          "token": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        "required": ["email", "addressId", "products", "paymentMethod"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "addressId": { "type": "string", "format": "uuid" },
+          "products": { "type": "array", "items": { "$ref": "#/components/schemas/OrderProductItem" } },
+          "paymentMethod": { "type": "string" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "order_id": { "type": "string", "format": "uuid" },
+          "address_id": { "type": "string" },
+          "products": { "type": "array", "items": { "$ref": "#/components/schemas/OrderProductItem" } },
+          "payment_method": { "type": "string" },
+          "status": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "OrdersResponse": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "orders": { "type": "array", "items": { "$ref": "#/components/schemas/Order" } }
+        }
+      },
+      "CancelOrderRequest": {
+        "type": "object",
+        "required": ["email", "orderId"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "orderId": { "type": "string", "format": "uuid" }
+        }
+      },
+      "OrderStatusResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "order_id": { "type": "string", "format": "uuid" },
+          "order_status": { "type": "string", "enum": ["confirmed", "cancelled"] }
+        }
+      },
+      "RecordContactRequest": {
+        "type": "object",
+        "required": ["email", "comments"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "comments": { "type": "string" }
+        }
+      },
+      "ContactResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "email": { "type": "string", "format": "email" }
         }
       }
     }

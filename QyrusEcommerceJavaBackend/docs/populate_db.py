@@ -1,14 +1,24 @@
+import os
 import mysql.connector
 import random
 
-# Connect to MySQL database
-connection = mysql.connector.connect(
-    host='localhost',
-    user='user',
-    port=3307,
-    password='password',
-    database='ecommerce'
-)
+# Connect to MySQL using the same MYSQL_* env vars the backends use.
+# Defaults match the local docker-compose setup; export real values to target another DB (e.g. prod RDS).
+connect_kwargs = {
+    "host": os.environ.get("MYSQL_HOST", "localhost"),
+    "port": int(os.environ.get("MYSQL_PORT", "3307")),
+    "user": os.environ.get("MYSQL_USER", "user"),
+    "password": os.environ.get("MYSQL_PASSWORD", "password"),
+    "database": os.environ.get("MYSQL_DATABASE_NAME", "ecommerce"),
+}
+
+# Optional TLS for connecting to AWS RDS: set MYSQL_SSL_CA to a PEM CA bundle path to enable it.
+mysql_ssl_ca = os.environ.get("MYSQL_SSL_CA")
+if mysql_ssl_ca:
+    connect_kwargs["ssl_ca"] = mysql_ssl_ca
+    connect_kwargs["ssl_verify_cert"] = True
+
+connection = mysql.connector.connect(**connect_kwargs)
 cursor = connection.cursor()
 # Category-specific placeholder images using open source/free images
 placeholder_images = {

@@ -22,7 +22,11 @@ services:
       context: ./QyrusEcommerceJavaBackend
     container_name: qart_java_backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce?createDatabaseIfNotExist=true
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE_NAME: ecommerce
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "9893:9893"
     depends_on:
@@ -34,7 +38,11 @@ services:
       context: ./QyrusEcommerceCSharpBackend
     container_name: qart_csharp_backend
     environment:
-      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=ecommerce;User=user;Password=password;"
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE_NAME: ecommerce
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "9892:9892"
     depends_on:
@@ -48,7 +56,11 @@ services:
       context: ./QyrusEcommerceBackend
     container_name: qart_python_backend
     environment:
-      DATABASE_URL: mysql+pymysql://user:password@mysql:3306/ecommerce
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE_NAME: ecommerce
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "9891:9891"
     depends_on:

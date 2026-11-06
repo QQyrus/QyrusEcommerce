@@ -11,12 +11,23 @@ COPY . .
 # be reachable from the host running the browser. Each backend is reached
 # through the API gateway at its own context path; GATEWAY_URL/GATEWAY_SECRET
 # are deployment-specific (e.g. sourced from Secrets Manager), so no default.
-ARG GATEWAY_URL
-ARG GATEWAY_SECRET
-ENV VITE_JAVA_API_URL=${GATEWAY_URL}/java
-ENV VITE_CSHARP_API_URL=${GATEWAY_URL}/csharp
-ENV VITE_PYTHON_API_URL=${GATEWAY_URL}/python
-ENV VITE_GATEWAY_TOKEN=$GATEWAY_SECRET
+ARG gateway_url
+ARG gateway_secret
+
+ENV VITE_JAVA_API_URL=${gateway_url}/java
+ENV VITE_CSHARP_API_URL=${gateway_url}/csharp
+ENV VITE_PYTHON_API_URL=${gateway_url}/python
+ENV VITE_GATEWAY_TOKEN=$gateway_secret
+
+# Not wired into any logging call yet; inlined now so the frontend can push
+# logs to Logzio in the future without another Dockerfile/build-arg change.
+ARG LogzioUrl
+ARG LogzioToken
+ARG LogzioEnvironmentName
+
+ENV VITE_LOGZIO_URL=${LogzioUrl}
+ENV VITE_LOGZIO_TOKEN=${LogzioToken}
+ENV VITE_LOGZIO_ENVIRONMENT_NAME=${LogzioEnvironmentName}
 
 RUN npm run build
 
