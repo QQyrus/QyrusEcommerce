@@ -20,8 +20,12 @@ builder.Services.AddCors(options => {
 // that the Java backend owns via Hibernate (ddl-auto=update) and that Python also reads
 // via SQLAlchemy - EF Core here maps directly onto Java's real table/column names so all
 // three backends share actual data, not just a server.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Server=localhost;Port=3307;Database=ecommerce;User=user;Password=password;";
+var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
+var mysqlPort = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3307";
+var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE_NAME") ?? "ecommerce";
+var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "user";
+var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "password";
+var connectionString = $"Server={mysqlHost};Port={mysqlPort};Database={mysqlDatabase};User={mysqlUser};Password={mysqlPassword};";
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 

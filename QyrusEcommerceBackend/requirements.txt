@@ -3,3 +3,4 @@ pydantic[email]
 uvicorn
 sqlalchemy
 pymysql
+mysql-connector-python

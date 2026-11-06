@@ -11,12 +11,13 @@ COPY . .
 # be reachable from the host running the browser. Each backend is reached
 # through the API gateway at its own context path; GATEWAY_URL/GATEWAY_SECRET
 # are deployment-specific (e.g. sourced from Secrets Manager), so no default.
-ARG GATEWAY_URL
-ARG GATEWAY_SECRET
-ENV VITE_JAVA_API_URL=${GATEWAY_URL}/java
-ENV VITE_CSHARP_API_URL=${GATEWAY_URL}/csharp
-ENV VITE_PYTHON_API_URL=${GATEWAY_URL}/python
-ENV VITE_GATEWAY_TOKEN=$GATEWAY_SECRET
+ARG gateway_url
+ARG gateway_secret
+
+ENV VITE_JAVA_API_URL=${gateway_url}/java
+ENV VITE_CSHARP_API_URL=${gateway_url}/csharp
+ENV VITE_PYTHON_API_URL=${gateway_url}/python
+ENV VITE_GATEWAY_TOKEN=$gateway_secret
 
 RUN npm run build
 

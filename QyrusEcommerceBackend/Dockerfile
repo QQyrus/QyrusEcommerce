@@ -6,6 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+RUN chmod +x entrypoint.sh
 
 # AWS Lambda Web Adapter, installed as a Lambda extension: it auto-activates
 # when this image runs as a Lambda function and proxies invokes to the HTTP
@@ -18,4 +19,4 @@ ENV PORT=${PORT}
 ENV AWS_LWA_PORT=${PORT}
 
 EXPOSE ${PORT}
-ENTRYPOINT ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT}"]
+ENTRYPOINT ["./entrypoint.sh"]
